@@ -1,0 +1,15 @@
+{
+	"serverExecutable": "../../game/factorio_server_17_41/bin/x64/factorio",
+	"serverWorkingDirectory": "../../game/factorio_server_17_41",
+	"botToken": "сюда писать токен",
+	"channelId": "сюда писать ID канала, из которого бот будет читать и в который будет писать",
+	
+	"serverChatFormat": "/silent-command for _, player in pairs(game.players) do player.print('[D] {author}: {message}', {{r = 0.5, g = 0.9, b = 0.9}}) end",
+	"serverChatEscapeInput": true,
+	
+	"discordChatFormat": "**{player}**: {message}",
+	"discordJoinFormat": "**{player}** joined.",
+	"discordLeaveFormat": "**{player}** left.",
+	"discordServerStarted": "Сервер запущен.",
+	"discordServerStopped": "Сервер остановлен."
+}

@@ -1,0 +1,12 @@
+{
+  "name": "factorio_discord_chat",
+  "version": "1.0.0",
+  "description": "Wrapper app for Factorio server that links it to Discord bot.",
+  "main": "main.js",
+  "author": "nartallax",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.5.0",
+    "string-format": "^2.0.0"
+  }
+}
