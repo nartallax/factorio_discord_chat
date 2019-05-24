@@ -22,8 +22,11 @@ let main = async () => {
 		discordBot.onServerStop();
 		setTimeout(() => discordBot.stop(), 1000);
 	});
+	server.on("command_output", e => discordBot.say(e.output));
+	server.on("player_death", e => discordBot.onPlayerDeath(e.dead, e.killer));
 	
-	discordBot.on("message", e => server.say(e.author, e.message))
+	discordBot.on("message", e => server.say(e.author, e.message, e.attachmentCount))
+	discordBot.on("command", e => server.runCommand(e.command, e.args));
 	
 	console.error("Starting discord bot...");
 	await discordBot.start();

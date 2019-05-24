@@ -14,7 +14,24 @@ module.exports = class DiscordBot extends EventEmitter {
 		
 		this.client.on("message", msg => {
 			if(msg.channel.id === this.config.channelId && msg.author.id !== this.userId){
-				this.emit("message", {author: msg.author.username, message: msg.content});
+				let guild = msg.guild;
+				let hasGuild = guild && guild.available;
+				
+				let username = msg.author.username;
+				let nick = hasGuild? guild.member(msg.author).displayName: username;
+				
+				if(msg.content in this.config.discordCommands){
+					this.emit("command", {
+						command: this.config.discordCommands[msg.content],
+						args: {
+							username,
+							nick,
+							pref: this.config.discordCommandOutputPrefix
+						}
+					})
+				} else {
+					this.emit("message", {author: nick, message: msg.content, attachmentCount: msg.attachments.size});
+				}
 			}
 		});
 		
@@ -54,6 +71,11 @@ module.exports = class DiscordBot extends EventEmitter {
 	
 	onServerStop(){
 		this.say(this.config.discordServerStopped);
+	}
+	
+	onPlayerDeath(dead, killer){
+		let formatStr = killer? this.config.discordPlayerKilledFormat: this.config.discordPlayerDiedFormat;
+		this.say(format(formatStr, {dead, killer}));
 	}
 	
 }

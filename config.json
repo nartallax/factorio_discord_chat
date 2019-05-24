@@ -1,15 +1,25 @@
 {
-	"serverExecutable": "../../game/factorio_server_17_41/bin/x64/factorio",
-	"serverWorkingDirectory": "../../game/factorio_server_17_41",
+	"serverExecutable": "/home/nartallax/game/factorio_server_17_41/bin/x64/factorio",
+	"serverWorkingDirectory": "/home/nartallax/game/factorio_server_17_41",
 	"botToken": "сюда писать токен",
 	"channelId": "сюда писать ID канала, из которого бот будет читать и в который будет писать",
 	
 	"serverChatFormat": "/silent-command for _, player in pairs(game.players) do player.print('[D] {author}: {message}', {{r = 0.5, g = 0.9, b = 0.9}}) end",
 	"serverChatEscapeInput": true,
+	"serverStdoutChatFormat": "[D] {author}: {message}",
 	
 	"discordChatFormat": "**{player}**: {message}",
 	"discordJoinFormat": "**{player}** joined.",
 	"discordLeaveFormat": "**{player}** left.",
+	"discordPlayerKilledFormat": "**{dead}** was killed by **{killer}**.",
+	"discordPlayerDiedFormat": "**{dead}** died.",
 	"discordServerStarted": "Сервер запущен.",
-	"discordServerStopped": "Сервер остановлен."
+	"discordServerStopped": "Сервер остановлен.",
+	"discordMessageHasAttachments": "[прикрепленные файлы]",
+	
+	"discordCommandOutputPrefix": "[TO_DISCORD]",
+	"discordCommands": {
+		"!test": "/silent-command print('{pref} It is working indeed, fellow **{username}**, known as **{nick}**.')",
+		"!players": "/silent-command local names = {{}} for _, player in pairs(game.players) do if(player.connected) then names[#names + 1] = player.name end end print('{pref}Игроки онлайн: ' .. table.concat(names, ', '))"
+	}
 }

@@ -29,7 +29,8 @@ module.exports = class ServerWrapper extends EventEmitter {
 			[/^[\d\-\s\:]+\[CHAT\]\s*([^:]+?):\s*(.*?)\s*$/, (player, message) => this.emit("chat", {player, message})],
 			[/^[\d\-\s\:]+\[JOIN\]\s*(.*?)\s*joined the game/, player => this.emit("join", {player})],
 			[/^[\d\-\s\:]+\[LEAVE\]\s*(.*?)\s*left the game/, player => this.emit("leave", {player})],
-			[/from\(CreatingGame\) to\(InGame\)$/, () => started()]
+			[/from\(CreatingGame\) to\(InGame\)$/, () => started()],
+			[/\[DEATH\]: \[(.*?)\] by \[(.*?)\]/, (dead, killer) => this.emit("player_death", {dead, killer})]
 		];
 		
 		// читаем stdout сервера
@@ -39,11 +40,17 @@ module.exports = class ServerWrapper extends EventEmitter {
 			process.stdout.write(line + "\n", "utf8");
 			
 			// а потом пытаемся распарсить
-			for(let regAndHandler of regs){
-				let match = line.match(regAndHandler[0]);
-				if(match){
-					regAndHandler[1](match[1], match[2]);
-					break;
+			if(line.startsWith(this.config.discordCommandOutputPrefix)){
+				this.emit("command_output", {
+					output: line.substr(this.config.discordCommandOutputPrefix.length).replace(/(^\s+|\s+$)/g, "")
+				});
+			} else {
+				for(let regAndHandler of regs){
+					let match = line.match(regAndHandler[0]);
+					if(match){
+						regAndHandler[1](match[1], match[2]);
+						break;
+					}
 				}
 			}
 		});
@@ -67,12 +74,25 @@ module.exports = class ServerWrapper extends EventEmitter {
 		this.process.stdin.write(characters, "utf8")
 	}
 	
-	say(author, message){
+	runCommand(template, params){
+		Object.keys(params).forEach(paramName => {
+			params[paramName] = luaEscape(params[paramName]);
+		});
+		
+		this.process.stdin.write(format(template, params) + "\n", "utf8")
+	}
+	
+	say(author, message, attachmentsCount){
 		if(this.config.serverChatEscapeInput){
 			author = luaEscape(author);
 			message = luaEscape(message);
 		}
 		
+		if(attachmentsCount > 0){
+			message += (message? " ": "") + this.config.discordMessageHasAttachments;
+		}
+		
+		process.stdout.write(format(this.config.serverStdoutChatFormat, {author, message}) + "\n", "utf8");
 		this.process.stdin.write(format(this.config.serverChatFormat, {author, message}) + "\n", "utf8")
 	}
 	
