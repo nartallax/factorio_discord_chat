@@ -2,8 +2,9 @@ let fs = require("fs"),
 	path = require("path"),
 	
 	ServerWrapper = require("./server.js"),
-	DiscordBot = require("./discord.js");
-	
+	DiscordBot = require("./discord.js"),
+	{safetyWrap} = require("./utils.js");
+
 let main = async () => {
 	// без этих хендлеров процесс завершается как-то криво, не давая серверу возможности сохраниться
 	process.on("SIGINT", () => {});
@@ -14,19 +15,19 @@ let main = async () => {
 	let server = new ServerWrapper(config);
 	let discordBot = new DiscordBot(config);
 	
-	server.on("join", e => discordBot.onJoin(e.player));
-	server.on("leave", e => discordBot.onLeave(e.player));
-	server.on("chat", e => discordBot.onChat(e.player, e.message));
-	server.on("exit", e => {
+	server.on("join", e => safetyWrap(() => discordBot.onJoin(e.player)));
+	server.on("leave", e => safetyWrap(() => discordBot.onLeave(e.player)));
+	server.on("chat", e => safetyWrap(() => discordBot.onChat(e.player, e.message)));
+	server.on("exit", e => safetyWrap(() => {
 		console.error("Server stopped. Exiting.");
 		discordBot.onServerStop();
 		setTimeout(() => discordBot.stop(), 1000);
-	});
-	server.on("command_output", e => discordBot.say(e.output));
-	server.on("player_death", e => discordBot.onPlayerDeath(e.dead, e.killer));
+	}));
+	server.on("command_output", e => safetyWrap(() => discordBot.say(e.output)));
+	server.on("player_death", e => safetyWrap(() => discordBot.onPlayerDeath(e.dead, e.killer)));
 	
-	discordBot.on("message", e => server.say(e.author, e.message, e.attachmentCount))
-	discordBot.on("command", e => server.runCommand(e.command, e.args));
+	discordBot.on("message", e => safetyWrap(() => server.say(e.author, e.message, e.attachmentCount)))
+	discordBot.on("command", e => safetyWrap(() => server.runCommand(e.command, e.args)));
 	
 	console.error("Starting discord bot...");
 	await discordBot.start();
@@ -37,12 +38,4 @@ let main = async () => {
 	discordBot.onServerStart();
 }
 
-(async () => {
-	try {
-		await main();
-	} catch(e){
-		console.error("Wrapper failed:");
-		console.error(e.stack);
-		process.exit(1);
-	}
-})();
+safetyWrap(main);

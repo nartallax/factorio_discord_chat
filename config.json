@@ -18,8 +18,13 @@
 	"discordMessageHasAttachments": "[прикрепленные файлы]",
 	
 	"discordCommandOutputPrefix": "[TO_DISCORD]",
+	"discordNewlineSeparator": "[DISCORD_SEPARATOR_NEWLINE]",
 	"discordCommands": {
-		"!test": "/silent-command print('{pref} It is working indeed, fellow **{username}**, known as **{nick}**.')",
-		"!players": "/silent-command local names = {{}} for _, player in pairs(game.players) do if(player.connected) then names[#names + 1] = player.name end end print('{pref}Игроки онлайн: ' .. table.concat(names, ', '))"
+		"!test": "/silent-command print('{pref} It is working indeed, fellow **{username}**.{n}(known as **{nick}**)')",
+		"!players": "/silent-command local names = {{}} for _, player in pairs(game.players) do if(player.connected) then names[#names + 1] = player.name end end print('{pref}Игроки онлайн: ' .. table.concat(names, ', '))",
+		"!poke": "/silent-command print('{pref} **{nick}** pokes himself.')",
+		"!poke some_player": "/silent-command print('{pref} **{nick}** pokes **{some_player}**.')",
+		"!poke some_player item": "/silent-command print('{pref} **{nick}** pokes **{some_player}** with his mighty **{item}**.')",
+		"!poke2 some_player": "/silent-command print('{pref} **{nick}** pokes2 **{some_player}**.')"
 	}
 }
