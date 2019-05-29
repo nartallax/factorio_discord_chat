@@ -72,7 +72,7 @@ module.exports = class DiscordBot extends EventEmitter {
 				let username = msg.author.username;
 				let nick = hasGuild? guild.member(msg.author).displayName: username;
 				
-				let cmdParts = parseCommand(msg.content);
+				let cmdParts = parseCommand(msg.cleanContent);
 				
 				if(cmdParts[0] in this.commands){
 					let {args, code} = this.commands[cmdParts[0]].selectOverload(cmdParts.slice(1));
@@ -88,7 +88,7 @@ module.exports = class DiscordBot extends EventEmitter {
 						}
 					})
 				} else {
-					this.emit("message", {author: nick, message: msg.content, attachmentCount: msg.attachments.size});
+					this.emit("message", {author: nick, message: msg.cleanContent, attachmentCount: msg.attachments.size});
 				}
 			}
 		}));
