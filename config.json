@@ -1,11 +1,10 @@
 {
 	"serverExecutable": "/home/nartallax/game/factorio_server_17_41/bin/x64/factorio",
 	"serverWorkingDirectory": "/home/nartallax/game/factorio_server_17_41",
-	"botToken": "сюда писать токен",
-	"channelId": "сюда писать ID канала, из которого бот будет читать и в который будет писать",
+	"botTokenFile": "./token.txt",
+	"channelId": "./channelId.txt",
 	
-	"serverChatFormat": "/silent-command for _, player in pairs(game.players) do player.print('[D] {author}: {message}', {{r = 0.5, g = 0.9, b = 0.9}}) end",
-	"serverChatEscapeInput": true,
+	"serverChatFormat": "/silent-command for _, player in pairs(game.players) do player.print('[D] {author}: {message}{attachment_string}', {{r = 0.5, g = 0.9, b = 0.9}}) end",
 	"serverStdoutChatFormat": "[D] {author}: {message}",
 	
 	"discordChatFormat": "**{player}**: {message}",
@@ -15,16 +14,48 @@
 	"discordPlayerDiedFormat": "**{dead}** died.",
 	"discordServerStarted": "Сервер запущен.",
 	"discordServerStopped": "Сервер остановлен.",
-	"discordMessageHasAttachments": "[прикрепленные файлы]",
+	"discordMessageHasAttachments": "[прикрепленные файлы: {attachments_count}]",
+	"discordCommandNotAllowedFormat": "You, **{nick}**, are not allowed to execute command **{command_name}** with **{arg_count}** arguments.",
 	
 	"discordCommandOutputPrefix": "[TO_DISCORD]",
 	"discordNewlineSeparator": "[DISCORD_SEPARATOR_NEWLINE]",
+	
 	"discordCommands": {
 		"!test": "/silent-command print('{pref} It is working indeed, fellow **{username}**.{n}(known as **{nick}**)')",
-		"!players": "/silent-command local names = {{}} for _, player in pairs(game.players) do if(player.connected) then names[#names + 1] = player.name end end print('{pref}Игроки онлайн: ' .. table.concat(names, ', '))",
+		"!players": { "commandFile": "./commands/players.lua" },
 		"!poke": "/silent-command print('{pref} **{nick}** pokes himself.')",
 		"!poke some_player": "/silent-command print('{pref} **{nick}** pokes **{some_player}**.')",
 		"!poke some_player item": "/silent-command print('{pref} **{nick}** pokes **{some_player}** with his mighty **{item}**.')",
-		"!poke2 some_player": "/silent-command print('{pref} **{nick}** pokes2 **{some_player}**.')"
-	}
+		"!wait_for_it": [
+			{"discordMessage": "It will be legen-"},
+			{"sleep": 1000},
+			{"discordMessage": "...wait for it..."},
+			{"sleep": 1000},
+			{"discordMessage": "...dary!"}
+		],
+		"!drive_bike": {
+			"userList": "bikers",
+			"actions": [
+				{ "discordMessage": "{nick} drives a bike now." }
+			]
+		},
+		"!reboot": {
+			"userList": "admins",
+			"actions": [
+				{ "command": "Reboot in 5 seconds." },
+				{ "sleep": 5000 },
+				{ "reboot": true },
+				{ "shell": "touch ./reboot_flag_file" }
+			]
+		}
+	},
+
+	"userLists": {
+		"admins": ["Nartallax#3956"],
+		"bikers": ["Biker#9999"]
+	},
+
+	"onServerStart": [
+		{"commandFile": "./commands/startup.lua"}
+	]
 }
