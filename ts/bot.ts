@@ -89,7 +89,8 @@ export class DiscordBot extends EventEmitter implements DiscordBotEventDefinitio
 				let hasGuild = guild && guild.available;
 				
 				let username = msg.author.username;
-				let nick = hasGuild? guild.member(msg.author).displayName: username;
+				let member = !hasGuild? null: guild.member(msg.author);
+				let nick = !member? username: member.displayName;
 				
 				let cmdParts = parseShellCommand(msg.cleanContent) as string[];
 				
