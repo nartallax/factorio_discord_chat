@@ -83,7 +83,8 @@ export class CommandRunner {
 		await new Promise<[string, string]>((ok, bad) => cp.exec(
 			completeCmd,
 			{
-				cwd: this.options.shellWorkingDirectory
+				cwd: this.options.shellWorkingDirectory,
+				maxBuffer: 512 * 1024 * 1024
 			},
 			(err, stdout, stderr) => {
 				if(err) {
