@@ -19,6 +19,7 @@ export interface DiscordBotChatEvent {
 export interface DiscordBotConfig {
 	token: string;
 	channelId: string;
+	autoHelp: boolean;
 	commands: MapObject<CommandDefinition>;
 	commandNotAllowedFormat: string;
 	userLists: MapObject<string[]>;
@@ -58,14 +59,39 @@ export class DiscordBot extends EventEmitter implements DiscordBotEventDefinitio
 		
 		Object.keys(config.commands).forEach(commandTemplate => {
 			let def = config.commands[commandTemplate];
-			let [commandName, ...argNames] = commandTemplate.split(" ");
-			if(!(commandName in this.commands)){
-				this.commands[commandName] = new DiscordCommand(commandName);
-			}
-			
-			let cmd = this.commands[commandName];
-			cmd.addOverload(argNames, def);
+			this.registerCommand(commandTemplate, def);
 		});
+
+		if(config.autoHelp){
+			let helpText = ""
+			Object.keys(this.commands).map(k => this.commands[k]).forEach(command => {
+				Object.keys(command.overloads).map(k => command.overloads[k]).forEach(overload => {
+					helpText += (helpText? "\n": "") 
+						+ "**" + command.name + "**" 
+						+ (overload.argNames.length > 0? " ": "") 
+						+ overload.argNames.join(" ");
+					if(typeof(overload.def) === "object" && (overload.def as CommandDefinitionWithAdditions).description){
+						helpText += ": " + (overload.def as CommandDefinitionWithAdditions).description;
+					}
+				});
+			});
+			this.registerCommand("!help", {
+				description: "Показать список команд",
+				actions: [
+					{discordMessage: helpText}
+				]
+			} as CommandDefinitionWithAdditions);
+		}
+	}
+
+	private registerCommand(commandTemplate: string, def: CommandDefinition){
+		let [commandName, ...argNames] = commandTemplate.split(" ");
+		if(!(commandName in this.commands)){
+			this.commands[commandName] = new DiscordCommand(commandName);
+		}
+		
+		let cmd = this.commands[commandName];
+		cmd.addOverload(argNames, def);
 	}
 
 	private isAuthorized(user: Discord.User, def: CommandDefinitionWithAdditions): boolean {

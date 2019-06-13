@@ -19,6 +19,7 @@
 	
 	"discordCommandOutputPrefix": "[TO_DISCORD]",
 	"discordNewlineSeparator": "[DISCORD_SEPARATOR_NEWLINE]",
+	"autoHelp": true,
 	
 	"discordCommands": {
 		"!test": "/silent-command print('{pref} It is working indeed, fellow **{username}**.{n}(known as **{nick}**)')",
@@ -41,6 +42,7 @@
 		},
 		"!reboot": {
 			"userList": "admins",
+			"description": "Перезагрузить сервер",
 			"actions": [
 				{ "command": "Reboot in 5 seconds." },
 				{ "sleep": 5000 },
@@ -50,6 +52,7 @@
 		},
 		"!backup": {
 			"userList": "admins",
+			"description": "Сделать бекап карты",
 			"actions": [
 				{"command": "/c game.server_save('my_backup')"},
 				{"discordMessage": "Saving..."},

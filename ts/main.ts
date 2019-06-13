@@ -14,6 +14,7 @@ async function createDiscordBot(config: any): Promise<DiscordBot>{
 	let botChannelId = (await readTextFile(path.resolve(__dirname, config.channelId))).trim();
 	return new DiscordBot({
 		token: botToken,
+		autoHelp: !!config.autoHelp,
 		channelId: botChannelId,
 		commands: config.discordCommands,
 		commandNotAllowedFormat: config.discordCommandNotAllowedFormat,

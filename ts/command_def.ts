@@ -4,6 +4,7 @@ export type CommandDefinition = Actions | CommandDefinitionWithAdditions;
 /** описание команды с дополнительными фичами */
 export interface CommandDefinitionWithAdditions {
 	userList?: string | string[]; /** имя списка/списков пользователей, которым можно использовать эту команду. не передан = можно всем */
+	description?: string; /** человекопонятное описание команды */
 	actions: ActionDefinition[];
 }
 
@@ -45,6 +46,7 @@ export type ShellAction = ShellLiteralAction | ShellFileAction
 export type ShellLiteralAction = { shell: string }
 export type ShellFileAction = { shellFile: string }
 
+/** Действие: подождать, пока сервер не выдаст линию с определенным содержанием в свой stdout */
 export type WaitLineAction = WaitIncludeLineAction | WaitRegexpLineAction;
 export interface WaitIncludeLineAction { waitLineIncludes: string }
 export interface WaitRegexpLineAction { waitLineRegexp: string }
