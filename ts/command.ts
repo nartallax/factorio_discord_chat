@@ -1,4 +1,4 @@
-import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction, StopAction, StartAction} from "command_def";
+import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction, StopAction, StartAction, ShellParametrizedAction} from "command_def";
 import {DiscordBot} from "bot";
 import {GameServer} from "game_server";
 import {MapObject, readTextFile, luaEscapeParams} from "utils";
@@ -43,6 +43,8 @@ export class CommandRunner {
 				await this.runShellLiteralAction(action, params);
 			} else if("shellFile" in action){
 				await this.runShellFileAction(action, params);
+			} else if("shellExec" in action){
+				await this.runShellExecAction(action, params);
 			} else if("discordMessage" in action){
 				await this.runDiscordMessageAction(action, params);
 			} else if("waitLineIncludes" in action){
@@ -103,6 +105,21 @@ export class CommandRunner {
 	private async runShellFileAction(action: ShellFileAction, params: MapObject<string>){
 		let formatString = await readTextFile(path.resolve(__dirname, action.shellFile));
 		await this.runShellLiteralAction({shell: formatString}, params);
+	}
+
+	private async runShellExecAction(action: ShellParametrizedAction, params: MapObject<string>){
+		let command = format(action.shellExec, params);
+		let args = (action.args || []).map(arg => format(arg, params));
+		await new Promise((ok, bad) => cp.execFile(command, args, {
+			cwd: this.options.shellWorkingDirectory,
+			maxBuffer: 512 * 1024 * 1024,
+		}, (err, stdout, stderr) => {
+			if(err){
+				bad(err);
+			} else {
+				ok([stdout, stderr])
+			}
+		}));
 	}
 	
 	private async runWaitRegexpLineAction(action: WaitRegexpLineAction){

@@ -76,6 +76,11 @@
 			"actions": [
 				{"start": true}
 			]
+		},
+		"!savemove from to": {
+			"actions": [
+				{"shellExec": "mv", "args": ["./saves/{from}.zip", "./saves/{to}.zip"]}
+			]
 		}
 	},
 
