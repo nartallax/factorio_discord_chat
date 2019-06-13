@@ -15,7 +15,7 @@ export type Actions = ActionDefinition | ActionDefinition[];
  * в случае строки подразумевается, что она содержит команду, которую нужно исполнить на сервере */
 export type ActionDefinition = string | ExtendedAction;
 
-export type ExtendedAction = SleepAction | ServerCommandAction | RebootAction | DiscordMessageAction | ShellAction | WaitLineAction;
+export type ExtendedAction = SleepAction | ServerCommandAction | RebootAction | DiscordMessageAction | ShellAction | WaitLineAction | StopAction | StartAction;
 
 /** Действие: подождать, прежде чем переходить к следующему действию */
 export interface SleepAction {
@@ -33,6 +33,9 @@ export type ServerCommandFileAction = { commandFile: string }
 export interface RebootAction {
 	reboot: true
 }
+
+export interface StopAction { stop: true }
+export interface StartAction { start: true }
 
 /** Действие: сказать что-либо в дискорд. доступны {}-плейсхолдеры */
 export interface DiscordMessageAction {

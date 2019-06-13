@@ -62,6 +62,20 @@
 				{"shell": "mv ./saves/my_backup.zip ./backups/"},
 				{"discordMessage": "Backup completed."}
 			]
+		},
+		"!stop": {
+			"userList": "admins",
+			"description": "Остановить сервер без остановки враппера",
+			"actions": [
+				{"stop": true}
+			]
+		},
+		"!start": {
+			"userList": "admins",
+			"description": "Запустить ранее остановленный сервер",
+			"actions": [
+				{"start": true}
+			]
 		}
 	},
 

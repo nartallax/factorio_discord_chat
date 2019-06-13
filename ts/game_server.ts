@@ -49,9 +49,13 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 		return this._process;
 	}
 
-	private _rebooting: boolean = false;
+	get isRunning(): boolean {
+		return !!this._process;
+	}
+
+	private _rebooting: number = 0;
 	get rebooting(): boolean {
-		return this._rebooting;
+		return !!this._rebooting;
 	}
 	
 	constructor(config: GameServerOptions){
@@ -60,6 +64,9 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 	}
 	
 	async start(): Promise<void>{
+		if(this.isRunning)
+			throw new Error("Server is already running, you can't start it twice.");
+
 		this._process = childProcess.spawn(this.config.executablePath, this.config.runParams, {
 			cwd: this.config.workingDirectory,
 			stdio: ["pipe", "pipe", "inherit"]
@@ -109,6 +116,7 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 		// когда процесс сервера завершился - перестаем читать наш stdin, чтобы не мешать процессу завершиться
 		this.process.on("exit", () => safetyWrap(() => {
 			ourReader.close();
+			this._process = null;
 			this.emit("server_stop");
 		}));
 		
@@ -116,10 +124,18 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 		this.emit("server_start");
 	}
 
-	stop(): Promise<void>{
-		let prom = new Promise<void>(ok => this.once("server_stop", ok));
-		this.process.kill("SIGINT");
-		return prom;
+	async stop(): Promise<void>{
+		if(!this.isRunning)
+			throw new Error("Server is not running, you can't stop it.");
+
+		this._rebooting++;
+		try {
+			let prom = new Promise<void>(ok => this.once("server_stop", ok));
+			this.process.kill("SIGINT");
+			await prom;
+		} finally {
+			this._rebooting--;
+		}
 	}
 	
 	writeLine(line: string): void {
@@ -127,14 +143,8 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 	}
 
 	async reboot(): Promise<void> {
-		this._rebooting = true;
-		try {
-			await this.stop();
-			await this.start();
-		} finally {
-			this._rebooting = false;
-		}
-		
+		await this.stop();
+		await this.start();
 	}
 
 	private lineHandlers = new Set<(line: string) => void>();

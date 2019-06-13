@@ -1,4 +1,4 @@
-import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction} from "command_def";
+import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction, StopAction, StartAction} from "command_def";
 import {DiscordBot} from "bot";
 import {GameServer} from "game_server";
 import {MapObject, readTextFile, luaEscapeParams} from "utils";
@@ -49,6 +49,10 @@ export class CommandRunner {
 				await this.runWaitIncludeLineAction(action);
 			} else if("waitLineRegexp" in action){
 				await this.runWaitRegexpLineAction(action);
+			} else if("stop" in action){
+				await this.runStopAction(action);
+			} else if("start" in action){
+				await this.runStartAction(action);
 			} else {
 				throw new Error("Couldn't recognize action type from definition: " + JSON.stringify(action));
 			}
@@ -108,5 +112,15 @@ export class CommandRunner {
 
 	private async runWaitIncludeLineAction(action: WaitIncludeLineAction){
 		await this.server.waitLine(line => line.includes(action.waitLineIncludes));
+	}
+
+	private async runStopAction(action: StopAction){
+		void action;
+		await this.server.stop();
+	}
+
+	private async runStartAction(action: StartAction){
+		void action;
+		await this.server.start();
 	}
 }
