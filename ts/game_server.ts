@@ -82,6 +82,8 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 		serverReader.on("line", line => safetyWrap(() => {
 			// выдаем каждое сообщение в наш stdout
 			process.stdout.write(line + "\n", "utf8");
+
+			this.lineHandlers.forEach(handler => safetyWrap(() => handler(line)));
 			
 			// а потом пытаемся распарсить
 			if(line.startsWith(this.config.commandOutputPrefix)){
@@ -133,6 +135,26 @@ export class GameServer extends EventEmitter implements GameServerEventsDefiniti
 			this._rebooting = false;
 		}
 		
+	}
+
+	private lineHandlers = new Set<(line: string) => void>();
+	waitLine(matcher: (line: string) => boolean): Promise<string>{
+		return new Promise((ok, bad) => {
+			try {
+				let handler = (line: string) => {
+					try {
+						if(matcher(line)){
+							this.lineHandlers.delete(handler);
+							ok();
+						}
+					} catch(e){
+						this.lineHandlers.delete(handler);
+						bad(e);
+					}
+				}
+				this.lineHandlers.add(handler);
+			} catch(e){ bad(e) }
+		});
 	}
 	
 }

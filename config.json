@@ -47,6 +47,18 @@
 				{ "reboot": true },
 				{ "shell": "touch ./reboot_flag_file" }
 			]
+		},
+		"!backup": {
+			"userList": "admins",
+			"actions": [
+				{"command": "/c game.server_save('my_backup')"},
+				{"discordMessage": "Saving..."},
+				{"waitLineIncludes": "Saving finished"},
+				{"discordMessage": "Saved. Moving to safehouse..."},
+				{"shell": "mkdir -p ./backups"},
+				{"shell": "mv ./saves/my_backup.zip ./backups/"},
+				{"discordMessage": "Backup completed."}
+			]
 		}
 	},
 

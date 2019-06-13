@@ -14,7 +14,7 @@ export type Actions = ActionDefinition | ActionDefinition[];
  * в случае строки подразумевается, что она содержит команду, которую нужно исполнить на сервере */
 export type ActionDefinition = string | ExtendedAction;
 
-export type ExtendedAction = SleepAction | ServerCommandAction | RebootAction | DiscordMessageAction | ShellAction;
+export type ExtendedAction = SleepAction | ServerCommandAction | RebootAction | DiscordMessageAction | ShellAction | WaitLineAction;
 
 /** Действие: подождать, прежде чем переходить к следующему действию */
 export interface SleepAction {
@@ -44,3 +44,7 @@ export interface DiscordMessageAction {
 export type ShellAction = ShellLiteralAction | ShellFileAction
 export type ShellLiteralAction = { shell: string }
 export type ShellFileAction = { shellFile: string }
+
+export type WaitLineAction = WaitIncludeLineAction | WaitRegexpLineAction;
+export interface WaitIncludeLineAction { waitLineIncludes: string }
+export interface WaitRegexpLineAction { waitLineRegexp: string }

@@ -1,4 +1,4 @@
-import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction} from "command_def";
+import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction} from "command_def";
 import {DiscordBot} from "bot";
 import {GameServer} from "game_server";
 import {MapObject, readTextFile, luaEscapeParams} from "utils";
@@ -45,6 +45,10 @@ export class CommandRunner {
 				await this.runShellFileAction(action, params);
 			} else if("discordMessage" in action){
 				await this.runDiscordMessageAction(action, params);
+			} else if("waitLineIncludes" in action){
+				await this.runWaitIncludeLineAction(action);
+			} else if("waitLineRegexp" in action){
+				await this.runWaitRegexpLineAction(action);
 			} else {
 				throw new Error("Couldn't recognize action type from definition: " + JSON.stringify(action));
 			}
@@ -90,10 +94,18 @@ export class CommandRunner {
 			})
 		);
 	}
-	
+
 	private async runShellFileAction(action: ShellFileAction, params: MapObject<string>){
 		let formatString = await readTextFile(path.resolve(__dirname, action.shellFile));
 		await this.runShellLiteralAction({shell: formatString}, params);
 	}
+	
+	private async runWaitRegexpLineAction(action: WaitRegexpLineAction){
+		let regexp = new RegExp(action.waitLineRegexp);
+		await this.server.waitLine(line => !!line.match(regexp));
+	}
 
+	private async runWaitIncludeLineAction(action: WaitIncludeLineAction){
+		await this.server.waitLine(line => line.includes(action.waitLineIncludes));
+	}
 }
