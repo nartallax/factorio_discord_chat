@@ -45,11 +45,12 @@ export interface DiscordMessageAction {
 /** Действие: исполнить shell-команду. Команду можно читать из файла
  * в команде можно использовать {}-плейсхолдеры, но они НИКАК не эскейпаются, так что это не рекомендуется в общем случае
  * т.к. это угроза безопасности */
-export type ShellAction = ShellLiteralAction | ShellFileAction | ShellParametrizedAction
-export interface ShellLiteralAction { shell: string }
-export interface ShellFileAction { shellFile: string }
+export type ShellAction = (ShellLiteralAction | ShellFileAction | ShellParametrizedAction)
+export interface ShellActionFlags { stdoutToDiscord?: boolean; stderrToDiscord?: boolean, stdoutCodeWrap?: boolean, stderrCodeWrap?: boolean}
+export interface ShellLiteralAction extends ShellActionFlags { shell: string }
+export interface ShellFileAction extends ShellActionFlags { shellFile: string }
 /** Исполнить некоторый файл, прокинув аргументы */
-export interface ShellParametrizedAction { shellExec: string, args?: string[] }
+export interface ShellParametrizedAction extends ShellActionFlags { shellExec: string, args?: string[] }
 
 /** Действие: подождать, пока сервер не выдаст линию с определенным содержанием в свой stdout */
 export type WaitLineAction = WaitIncludeLineAction | WaitRegexpLineAction;

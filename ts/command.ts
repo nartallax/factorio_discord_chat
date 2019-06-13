@@ -1,4 +1,4 @@
-import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction, StopAction, StartAction, ShellParametrizedAction} from "command_def";
+import {Actions, SleepAction, ServerCommandLiteralAction, ServerCommandFileAction, DiscordMessageAction, ShellLiteralAction, ShellFileAction, WaitRegexpLineAction, WaitIncludeLineAction, StopAction, StartAction, ShellParametrizedAction, ShellActionFlags} from "command_def";
 import {DiscordBot} from "bot";
 import {GameServer} from "game_server";
 import {MapObject, readTextFile, luaEscapeParams} from "utils";
@@ -92,10 +92,11 @@ export class CommandRunner {
 				cwd: this.options.shellWorkingDirectory,
 				maxBuffer: 512 * 1024 * 1024
 			},
-			(err, stdout, stderr) => {
+			async (err, stdout, stderr) => {
 				if(err) {
 					bad(err);
 				} else {
+					await this.doWithShellOutput(stdout, stderr, action);
 					ok([stdout, stderr]);
 				}
 			})
@@ -113,13 +114,27 @@ export class CommandRunner {
 		await new Promise((ok, bad) => cp.execFile(command, args, {
 			cwd: this.options.shellWorkingDirectory,
 			maxBuffer: 512 * 1024 * 1024,
-		}, (err, stdout, stderr) => {
+		}, async (err, stdout, stderr) => {
 			if(err){
 				bad(err);
 			} else {
+				await this.doWithShellOutput(stdout, stderr, action);
 				ok([stdout, stderr])
 			}
 		}));
+	}
+
+	private async doWithShellOutput(stdout: string, stderr: string, flags: ShellActionFlags){
+		if(flags.stdoutToDiscord){
+			if(flags.stdoutCodeWrap)
+				stdout = "```\n" + stdout + "\n```";
+			this.discord.sendMessage(stdout);
+		}
+		if(flags.stderrToDiscord){
+			if(flags.stderrCodeWrap)
+				stderr = "```\n" + stderr + "\n```";
+			this.discord.sendMessage(stderr);
+		}
 	}
 	
 	private async runWaitRegexpLineAction(action: WaitRegexpLineAction){

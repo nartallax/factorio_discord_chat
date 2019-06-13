@@ -81,6 +81,11 @@
 			"actions": [
 				{"shellExec": "mv", "args": ["./saves/{from}.zip", "./saves/{to}.zip"]}
 			]
+		},
+		"!list_saves": {
+			"actions": [
+				{"shell": "ls -sh ./saves/*.zip -w 1", "stdoutToDiscord": true, "stdoutCodeWrap": true}
+			]
 		}
 	},
 
