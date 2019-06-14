@@ -86,19 +86,17 @@ export class CommandRunner {
 
 	private async runShellLiteralAction(action: ShellLiteralAction, params: MapObject<string>){
 		let completeCmd = format(action.shell, params);
-		await new Promise<[string, string]>((ok, bad) => cp.exec(
+		await new Promise((ok, bad) => cp.exec(
 			completeCmd,
 			{
 				cwd: this.options.shellWorkingDirectory,
 				maxBuffer: 512 * 1024 * 1024
 			},
 			async (err, stdout, stderr) => {
-				if(err) {
-					bad(err);
-				} else {
+				try {
 					await this.doWithShellOutput(stdout, stderr, action);
-					ok([stdout, stderr]);
-				}
+				} catch(e) { bad(e) }
+				err? bad(err): ok();
 			})
 		);
 	}
@@ -115,12 +113,10 @@ export class CommandRunner {
 			cwd: this.options.shellWorkingDirectory,
 			maxBuffer: 512 * 1024 * 1024,
 		}, async (err, stdout, stderr) => {
-			if(err){
-				bad(err);
-			} else {
+			try {
 				await this.doWithShellOutput(stdout, stderr, action);
-				ok([stdout, stderr])
-			}
+			} catch(e) { bad(e) }
+			err? bad(err): ok();
 		}));
 	}
 
@@ -128,12 +124,12 @@ export class CommandRunner {
 		if(flags.stdoutToDiscord){
 			if(flags.stdoutCodeWrap)
 				stdout = "```\n" + stdout + "\n```";
-			this.discord.sendMessage(stdout);
+			await this.discord.sendMessage(stdout);
 		}
 		if(flags.stderrToDiscord){
 			if(flags.stderrCodeWrap)
 				stderr = "```\n" + stderr + "\n```";
-			this.discord.sendMessage(stderr);
+			await this.discord.sendMessage(stderr);
 		}
 	}
 	
