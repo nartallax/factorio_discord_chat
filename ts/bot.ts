@@ -155,6 +155,10 @@ export class DiscordBot extends EventEmitter implements DiscordBotEventDefinitio
 				}
 			}
 		}));
+
+		this.client.on("error", err => {
+			console.error("Discord client lib failed: ", err.stack);
+		});
 		
 		await this.client.login(this.config.token);
 		
