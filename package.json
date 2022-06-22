@@ -10,7 +10,7 @@
     "@types/shell-quote": "^1.6.1",
     "@types/string-format": "^2.0.0",
     "discord.js": "^11.5.0",
-    "shell-quote": "^1.6.1",
+    "shell-quote": "^1.7.3",
     "string-format": "^2.0.0"
   }
 }
